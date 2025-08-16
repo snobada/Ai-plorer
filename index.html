@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Xplorer - Discover the Future of AI</title>
+    
+    <!-- Google Fonts for stylish typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Chakra+Petch:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS - All styling is in this block */
+
+        /* ------------------- */
+        /* --- Root & Globals --- */
+        /* ------------------- */
+        :root {
+            --bg-color: #05100a; /* Dark Green */
+            --primary-text: #c7f7d4; /* Light Green Tinted White */
+            --accent-color-1: #00ff7f; /* Spring Green */
+            --accent-color-2: #39ff14; /* Neon Green */
+            --glow-color-1: rgba(0, 255, 127, 0.7);
+            --glow-color-2: rgba(57, 255, 20, 0.7);
+            
+            /* NEW: Label colors */
+            --label-paid-text: #ffbd48;
+            --label-paid-bg: rgba(255, 189, 72, 0.1);
+            --label-paid-border: rgba(255, 189, 72, 0.5);
+            --label-opensource-text: #c77dff;
+            --label-opensource-bg: rgba(199, 125, 255, 0.1);
+            --label-opensource-border: rgba(199, 125, 255, 0.5);
+            --label-free-text: #55aaff;
+            --label-free-bg: rgba(85, 170, 255, 0.1);
+            --label-free-border: rgba(85, 170, 255, 0.5);
+
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        
+        /* NEW: Canvas for persistent background animation */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Sits behind ALL content */
+        }
+
+
+        /* ------------------- */
+        /* --- Preloader Intro --- */
+        /* ------------------- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.75s ease-in-out, visibility 0.75s ease-in-out;
+        }
+
+        #preloader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid transparent;
+            border-top-color: var(--accent-color-1);
+            border-right-color: var(--accent-color-2);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ------------------- */
+        /* --- Navigation --- */
+        /* ------------------- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(5, 16, 10, 0.2);
+            backdrop-filter: blur(10px);
+            transition: top 0.3s;
+        }
+        
+        .nav-logo {
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
+            font-size: 1.5em;
+            color: var(--primary-text);
+            text-decoration: none;
+            text-shadow: 0 0 5px var(--glow-color-2);
+        }
+
+        .nav-links a {
+            color: var(--primary-text);
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: 400;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color-2);
+            text-shadow: 0 0 10px var(--glow-color-2);
+        }
+
+        /* ------------------- */
+        /* --- Parallax Structure --- */
+        /* ------------------- */
+        .parallax-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+            
+            /* The magic */
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        /* REMOVED: .parallax-section canvas rule */
+
+        /* NEW: Background images - AI-drawn patterns */
+        .bg-1 {
+            background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=2070&auto=format&fit=crop');
+        }
+
+        .bg-2 {
+             background-image: url('https://images.unsplash.com/photo-1620283085063-494a7a8a3f8f?q=80&w=1974&auto=format&fit=crop');
+        }
+
+        /* Overlay for readability and aesthetic lighting */
+        .parallax-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(5, 16, 10, 0.85), rgba(0, 143, 17, 0.4));
+            z-index: 2; /* Sits above canvas, below content */
+        }
+
+        /* Solid content sections to break up the parallax */
+        .content-section {
+            padding: 100px 50px;
+            background-color: transparent; /* Makes canvas background visible */
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* ------------------- */
+        /* --- Section Specifics --- */
+        /* ------------------- */
+        .hero-content,
+        .parallax-content-wrapper { /* General wrapper for content in parallax sections */
+            position: relative;
+            z-index: 3; /* To appear above the overlay */
+        }
+        
+        .hero-content {
+            opacity: 0; /* Initially hidden for animation */
+            animation: fadeInHero 1.5s 1s ease-out forwards;
+        }
+
+        .main-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 5rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-shadow: 
+                0 0 10px var(--glow-color-1),
+                0 0 20px var(--glow-color-1),
+                0 0 40px var(--glow-color-2),
+                0 0 60px var(--glow-color-2);
+            animation: pulse-glow 4s infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        @keyframes fadeInHero {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-glow {
+            from {
+                text-shadow: 
+                    0 0 5px var(--glow-color-1),
+                    0 0 10px var(--glow-color-1),
+                    0 0 20px var(--glow-color-2),
+                    0 0 30px var(--glow-color-2);
+            }
+            to {
+                text-shadow: 
+                    0 0 10px var(--glow-color-1),
+                    0 0 20px var(--glow-color-1),
+                    0 0 40px var(--glow-color-2),
+                    0 0 70px var(--glow-color-2);
+            }
+        }
+        
+        .section-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--accent-color-2);
+            text-shadow: 0 0 10px var(--glow-color-2);
+        }
+
+        .section-text {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        /* --- Featured Tools Section --- */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tool-card {
+            background: rgba(0, 255, 127, 0.05);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(15px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative; /* NEW: For positioning the label */
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px var(--glow-color-1);
+        }
+        
+        .tool-card h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--accent-color-1);
+            margin-bottom: 15px;
+        }
+
+        .tool-card p {
+            font-weight: 300;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1; /* Makes sure the button aligns to the bottom */
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
+            color: #000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            align-self: flex-start; /* Aligns button to the left */
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px var(--glow-color-2);
+        }
+        
+        /* NEW: Tool Label Styles */
+        .tool-label {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-family: 'Share Tech Mono', monospace;
+            border-radius: 5px;
+            border: 1px solid;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        .label-freemium {
+            color: var(--accent-color-1);
+            border-color: rgba(0, 255, 127, 0.5);
+            background-color: rgba(0, 255, 127, 0.1);
+        }
+
+        .label-paid {
+            color: var(--label-paid-text);
+            border-color: var(--label-paid-border);
+            background-color: var(--label-paid-bg);
+        }
+        
+        .label-free {
+            color: var(--label-free-text);
+            border-color: var(--label-free-border);
+            background-color: var(--label-free-bg);
+        }
+        
+        .label-opensource {
+            color: var(--label-opensource-text);
+            border-color: var(--label-opensource-border);
+            background-color: var(--label-opensource-bg);
+        }
+
+        /* --- Categories Section --- */
+        .categories-list {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .category-chip {
+            background-color: rgba(57, 255, 20, 0.1);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            border: 1px solid var(--accent-color-1);
+            transition: background-color 0.3s, transform 0.3s, color 0.3s;
+            text-decoration: none;
+            color: var(--primary-text);
+        }
+        
+        .category-chip:hover {
+            background-color: var(--accent-color-1);
+            color: #000;
+            transform: scale(1.05);
+        }
+        
+        /* --- Full Directory Styles --- */
+        .category-block {
+            padding-top: 80px; /* Space for anchor link scrolling */
+            margin-top: -80px; /* Offset the padding */
+        }
+        
+        .category-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: var(--primary-text);
+            margin-top: 60px;
+            margin-bottom: 40px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color-1);
+            padding-bottom: 15px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* ------------------- */
+        /* --- Footer --- */
+        /* ------------------- */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: rgba(5, 16, 10, 0.5); /* Updated background */
+            position: relative;
+            z-index: 5; /* Ensure footer is above scrolling content */
+        }
+
+        /* ------------------- */
+        /* --- Animation on Scroll --- */
+        /* ------------------- */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Staggered animation for card children */
+        .visible:nth-child(2) { transition-delay: 0.1s; }
+        .visible:nth-child(3) { transition-delay: 0.2s; }
+        .visible:nth-child(4) { transition-delay: 0.3s; }
+        .visible:nth-child(5) { transition-delay: 0.4s; }
+    </style>
+</head>
+<body>
+
+    <!-- NEW: Persistent background canvas -->
+    <canvas id="background-canvas"></canvas>
+
+    <!-- ======== PRELOADER INTRO ======== -->
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- ======== 1. HEADER / NAVIGATION ======== -->
+    <nav class="navbar">
+        <a href="#hero" class="nav-logo">AI Xplorer</a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#tools">Tools</a>
+            <a href="#categories">Categories</a>
+            <a href="#cta">Join Us</a>
+        </div>
+    </nav>
+    
+    <main>
+
+        <!-- ======== 2. HERO SECTION ======== -->
+        <section id="hero" class="parallax-section bg-1">
+            <!-- REMOVED: hero-canvas -->
+            <div class="hero-content">
+                <h1 class="main-title">AI Xplorer</h1>
+                <p class="subtitle">Your Gateway to the Universe of Artificial Intelligence</p>
+            </div>
+        </section>
+        
+        <!-- ======== 3. ABOUT SECTION ======== -->
+        <section id="about" class="content-section">
+            <h2 class="section-title scroll-animate">What is AI Xplorer?</h2>
+            <p class="section-text scroll-animate">
+                AI Xplorer is a curated directory of the most innovative and powerful AI tools available today. From generating stunning visuals to writing flawless code, we navigate the vast cosmos of artificial intelligence to bring you the best, so you can focus on creating the future.
+            </p>
+        </section>
+
+        <!-- ======== 4. FEATURED TOOLS SECTION ======== -->
+        <section id="tools" class="parallax-section bg-2">
+            <!-- REMOVED: tools-canvas -->
+            <div class="parallax-content-wrapper" style="width: 100%; padding: 100px 50px;">
+                <h2 class="section-title scroll-animate">Featured AI Tools</h2>
+                <div class="tools-grid">
+                    <!-- Tool Card 1 -->
+                    <div class="tool-card scroll-animate">
+                        <span class="tool-label label-paid">Paid</span>
+                        <h3>Midjourney</h3>
+                        <p>A leading AI image generator known for its artistic and highly detailed photorealistic outputs from simple text prompts.</p>
+                        <a href="https://www.midjourney.com/" target="_blank" rel="noopener noreferrer" class="btn">Explore Midjourney</a>
+                    </div>
+                    <!-- Tool Card 2 -->
+                    <div class="tool-card scroll-animate">
+                        <span class="tool-label label-freemium">Freemium</span>
+                        <h3>ChatGPT</h3>
+                        <p>OpenAI's state-of-the-art language model for conversational AI, content creation, summarization, and complex problem-solving.</p>
+                        <a href="https://chat.openai.com/" target="_blank" rel="noopener noreferrer" class="btn">Try ChatGPT</a>
+                    </div>
+                    <!-- Tool Card 3 -->
+                    <div class="tool-card scroll-animate">
+                        <span class="tool-label label-freemium">Freemium</span>
+                        <h3>Runway</h3>
+                        <p>An all-in-one content creation suite with powerful AI magic tools for video editing, image generation, and more.</p>
+                        <a href="https://runwayml.com/" target="_blank" rel="noopener noreferrer" class="btn">Discover Runway</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======== 5. CATEGORIES SECTION ======== -->
+        <section id="categories" class="content-section">
+            <h2 class="section-title scroll-animate">Explore by Category</h2>
+            <div class="categories-list">
+                <a href="#cat-text" class="category-chip scroll-animate">Text & Writing</a>
+                <a href="#cat-image" class="category-chip scroll-animate">Image Generation</a>
+                <a href="#cat-video" class="category-chip scroll-animate">Video Tools</a>
+                <a href="#cat-code" class="category-chip scroll-animate">Code & Developer</a>
+                <a href="#cat-audio" class="category-chip scroll-animate">Audio & Music</a>
+                <a href="#cat-productivity" class="category-chip scroll-animate">Productivity</a>
+                <a href="#cat-marketing" class="category-chip scroll-animate">Marketing & SEO</a>
+                <a href="#cat-design" class="category-chip scroll-animate">3D & Design</a>
+                <a href="#cat-research" class="category-chip scroll-animate">Research & Data</a>
+                <a href="#cat-voice" class="category-chip scroll-animate">Voice & Avatar</a>
+            </div>
+        </section>
+        
+        <!-- ======== 6. FULL AI TOOL DIRECTORY ======== -->
+        <section id="full-directory" class="content-section">
+            <h2 class="section-title scroll-animate">The AI Cosmos: Full Directory</h2>
+
+            <!-- Text & Writing -->
+            <div id="cat-text" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Text & Writing</h3>
+                <div class="tools-grid">
+                   <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>ChatGPT</h3><p>Conversational AI for generating text, summarizing, translating, and problem-solving.</p><a href="https://chat.openai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Jasper</h3><p>AI copywriter and content platform for creating marketing assets, social media, and blogs.</p><a href="https://www.jasper.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Copy.ai</h3><p>Generates high-quality marketing copy, product descriptions, and content in seconds.</p><a href="https://www.copy.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Writesonic</h3><p>AI writer for creating SEO-friendly articles, landing pages, and Google Ads.</p><a href="https://writesonic.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Grammarly</h3><p>AI-powered writing assistant for grammar, spelling, style, and tone checks.</p><a href="https://www.grammarly.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>QuillBot</h3><p>AI paraphrasing tool, summarizer, citation generator, and grammar checker.</p><a href="https://quillbot.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Rytr</h3><p>An affordable and fast AI writing assistant for various content types and niches.</p><a href="https://rytr.me/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Google Gemini</h3><p>Google's creative and helpful collaborator for brainstorming, writing, and planning.</p><a href="https://gemini.google.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Claude</h3><p>A next-generation AI assistant for tasks and conversations by Anthropic.</p><a href="https://claude.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Surfer SEO</h3><p>AI-powered tool for writing and optimizing long-form content that ranks on search engines.</p><a href="https://surferseo.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Wordtune</h3><p>AI writing companion that helps you rephrase sentences to be more clear and compelling.</p><a href="https://www.wordtune.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Sudowrite</h3><p>The ultimate creative writing partner for brainstorming and writing fiction novels.</p><a href="https://www.sudowrite.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Frase</h3><p>AI tool for content research, outlining, writing, and optimizing for SEO.</p><a href="https://www.frase.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Scalenut</h3><p>AI-powered content marketing platform for planning, creating, and optimizing content.</p><a href="https://www.scalenut.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Content at Scale</h3><p>AI writer for generating long-form, human-quality blog posts from keywords.</p><a href="https://contentatscale.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Anyword</h3><p>Performance-driven AI copywriting tool that optimizes copy for conversions.</p><a href="https://anyword.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Hix.ai</h3><p>All-in-one AI writing copilot with 120+ tools for articles, emails, and social media.</p><a href="https://hix.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>HyperWrite</h3><p>Personal AI writing assistant and Chrome extension that learns your style.</p<a href="https://www.hyperwriteai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Article Forge</h3><p>AI article writer that creates unique, high-quality, long-form content with one click.</p><a href="https://articleforge.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>LongShot AI</h3><p>AI writer for creating factual, SEO-friendly, long-form content and blogs.</p><a href="https://www.longshot.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>ShortlyAI</h3><p>Powerful AI writing partner that helps you overcome writer's block instantly.</p><a href="https://www.shortlyai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>TextCortex</h3><p>AI writing assistant and Chrome extension for various content creation tasks.</p><a href="https://text.cortex.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>NovelAI</h3><p>AI-assisted authorship, storytelling, and virtual companionship for creative writers.</p><a href="https://novelai.net/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Simplified</h3><p>All-in-one app with an AI writer, video editor, and graphic design tools.</p<a href="https://simplified.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Agility Writer</h3><p>AI writing tool focused on creating in-depth, factual articles with citations.</p><a href="https://www.agilitywriter.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>GrowthBar</h3><p>AI writing tool for SEO that helps you create blog posts that rank on Google.</p><a href="https://www.growthbarseo.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>KoalaWriter</h3><p>One-click AI writer for creating high-quality, SEO-optimized blog posts quickly.</p><a href="https://koala.sh/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Copymatic</h3><p>AI-powered content writer and copy generator for various use cases and formats.</p><a href="https://copymatic.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>ClickUp AI</h3><p>AI assistant integrated directly into the ClickUp productivity platform.</p><a href="https://clickup.com/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Text Blaze</h3><p>Text expander and snippet manager with AI features to automate repetitive typing.</p><a href="https://blaze.today/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+
+            <!-- Image Generation -->
+            <div id="cat-image" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Image Generation</h3>
+                <div class="tools-grid">
+                   <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Midjourney</h3><p>Premier AI art generator for creating artistic and photorealistic images via Discord.</p><a href="https://www.midjourney.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>DALL-E 3</h3><p>OpenAI's powerful and intuitive image generator, integrated directly into ChatGPT Plus.</p><a href="https://openai.com/dall-e-3" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-opensource">Open Source</span><h3>Stable Diffusion</h3><p>Powerful open-source model for creating highly detailed and customizable images.</p><a href="https://stablediffusionweb.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Leonardo.Ai</h3><p>A suite of tools for creating stunning game assets and artistic images with fine-tuned models.</p><a href="https://leonardo.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Adobe Firefly</h3><p>Adobe's generative AI family for images, designed to be commercially safe and ethical.</p><a href="https://www.adobe.com/sensei/generative-ai/firefly.html" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Ideogram</h3><p>AI image generator known for its exceptional ability to render coherent text in images.</p><a href="https://ideogram.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Playground AI</h3><p>Free-to-use online AI image creator with powerful inpainting and editing features.</p><a href="https://playgroundai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Canva AI Image Generator</h3><p>Easily create images from text within the Canva design platform for your projects.</p><a href="https://www.canva.com/ai-image-generator/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Krea AI</h3><p>Real-time AI image generation, upscaling, and enhancement for creative workflows.</p><a href="https://www.krea.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Clipdrop</h3><p>An ecosystem of AI apps by Stability AI for image creation, cleanup, and upscaling.</p><a href="https://clipdrop.co/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Microsoft Designer</h3><p>AI-powered graphic design app with an integrated image creator based on DALL-E.</p><a href="https://designer.microsoft.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Recraft AI</h3><p>Generate consistent style vector art, icons, 3D images, and illustrations from prompts.</p><a href="https://www.recraft.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>DreamStudio</h3><p>Official web interface from Stability AI for generating images with Stable Diffusion models.</p><a href="https://dreamstudio.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Magnific AI</h3><p>The leading AI image upscaler and enhancer for adding incredible detail to images.</p><a href="https://magnific.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>NightCafe Creator</h3><p>AI Art Generator with multiple methods, including Stable Diffusion and DALL-E 2.</p><a href="https://nightcafe.studio/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Artbreeder</h3><p>Create and explore unique images by mixing and "breeding" existing images together.</p><a href="https://www.artbreeder.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Topaz Photo AI</h3><p>Desktop software for upscaling, denoising, and sharpening photos with remarkable quality.</p><a href="https://www.topazlabs.com/topaz-photo-ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>SeaArt.ai</h3><p>Free AI art generator with a wide range of models and styles for creative expression.</p><a href="https://www.seaart.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Fotor</h3><p>Online photo editor with a suite of AI tools, including an image generator and enhancer.</p><a href="https://www.fotor.com/features/ai-image-generator/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Let's Enhance</h3><p>AI image upscaler and enhancer for improving photo quality, resolution, and color.</p><a href="https://letsenhance.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Runway</h3><p>AI creative suite with powerful image generation and infinite image expansion tools.</p><a href="https://runwayml.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Civitai</h3><p>The largest hub for Stable Diffusion models, with a free online image generator.</p><a href="https://civitai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Remove.bg</h3><p>Automatically remove the background from any image with a single click using AI.</p><a href="https://www.remove.bg/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>NVIDIA Canvas</h3><p>Turn simple brushstrokes into realistic landscape images with the power of AI.</p><a href="https://www.nvidia.com/en-us/studio/canvas/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pebblely</h3><p>AI product photography tool that creates beautiful lifestyle images for any product.</p<a href="https://pebblely.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+
+            <!-- Video Tools -->
+            <div id="cat-video" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Video Tools</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Runway</h3><p>Advanced AI magic tools for video, including text-to-video, inpainting, and motion tracking.</p><a href="https://runwayml.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pika</h3><p>Powerful idea-to-video platform that brings your creativity to motion with generative AI.</p><a href="https://pika.art/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Synthesia</h3><p>Leading AI video generation platform to create professional videos with AI avatars and voices.</p><a href="https://www.synthesia.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>HeyGen</h3><p>AI video platform for creating engaging business videos with avatars and voice cloning.</p><a href="https://www.heygen.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>InVideo AI</h3><p>Generate publish-ready videos from a simple text prompt, including script, voiceover, and media.</p><a href="https://invideo.io/ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Opus Clip</h3><p>Turns long videos into short, viral clips for social media with AI-powered curation.</p><a href="https://www.opus.pro/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Veed.io</h3><p>Online video suite with AI tools for editing, subtitles, transcription, and avatars.</p><a href="https://www.veed.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Descript</h3><p>All-in-one video and audio editor that lets you edit video by editing a text transcript.</p><a href="https://www.descript.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pictory</h3><p>AI video generator that automatically creates short, shareable videos from long content.</p><a href="https://pictory.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Fliki</h3><p>Turn text into videos with AI voices, a vast stock media library, and branded subtitles.</p><a href="https://fliki.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Lumen5</h3><p>AI-powered video creation platform that turns blog posts into engaging social videos.</p><a href="https://lumen5.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Kaiber</h3><p>Generative AI video engine that transforms your ideas and images into stunning videos.</p><a href="https://kaiber.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>D-ID</h3><p>Create videos from still images, text, or audio with AI-powered digital people.</p><a href="https://www.d-id.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>CapCut</h3><p>Popular mobile and desktop video editor with extensive AI features, effects, and templates.</p><a href="https://www.capcut.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Clipchamp</h3><p>AI-powered video editor by Microsoft with built-in voiceover and text-to-speech tools.</p><a href="https://clipchamp.com/en/features/ai-video-editor/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Deepbrain AI</h3><p>Create realistic AI avatar videos quickly and easily by simply typing a script.</p><a href="https://www.deepbrain.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Colossyan</h3><p>AI video generator for workplace learning and communication with realistic avatars.</p><a href="https://www.colossyan.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Hour One</h3><p>AI video creation platform using digital avatars and synthetic voices for business.</p><a href="https://hourone.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Wisecut</h3><p>AI video editor that automatically cuts silences, adds captions, and creates jump cuts.</p><a href="https://www.wisecut.video/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Captions</h3><p>AI-powered creative studio for generating dynamic, word-by-word captions on videos.</p><a href="https://www.captions.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Vidnoz AI</h3><p>Free AI video generator with 300+ avatars, 470+ realistic voices, and templates.</p><a href="https://www.vidnoz.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Elai.io</h3><p>Generate AI videos with custom avatars and narrations from just text for training.</p><a href="https://elai.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Steve.AI</h3><p>AI tool that turns scripts into engaging animated or live-action videos for social media.</p><a href="https://www.steve.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>FlexClip</h3><p>Easy-to-use online video maker with rich templates and integrated AI-powered tools.</p><a href="https://www.flexclip.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Klipply</h3><p>AI short-form video creator that generates clips with captions, stock footage, and voiceovers.</p><a href="https://www.klipply.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+
+            <!-- Code & Developer -->
+            <div id="cat-code" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Code & Developer</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>GitHub Copilot</h3><p>The original AI pair programmer that suggests code and entire functions in real-time.</p><a href="https://github.com/features/copilot" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Codeium</h3><p>Free AI code completion, chat, and search tool, a powerful alternative to Copilot.</p><a href="https://codeium.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Amazon CodeWhisperer</h3><p>Build applications faster with an AI coding companion from AWS, free for individuals.</p><a href="https://aws.amazon.com/codewhisperer/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Tabnine</h3><p>AI code completion assistant that learns your coding patterns and style.</p><a href="https://www.tabnine.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Cursor</h3><p>An AI-first code editor designed for building software faster with a built-in copilot.</p><a href="https://cursor.sh/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Sourcegraph Cody</h3><p>AI coding assistant that knows your entire codebase for intelligent answers and completions.</p><a href="https://sourcegraph.com/cody" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Replit AI</h3><p>The AI coding assistant and pair programmer built into the Replit online IDE.</p><a href="https://replit.com/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Phind</h3><p>An AI search engine and pair programmer for developers to solve complex problems.</p><a href="https://www.phind.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Vercel v0</h3><p>Generative UI tool that creates copy-and-paste friendly React UIs from text prompts.</p><a href="https://v0.dev/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>CodiumAI</h3><p>AI-powered tool that generates meaningful tests and analyzes code quality to find bugs.</p><a href="https://www.codium.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Warp</h3><p>A blazingly fast, modern terminal with built-in AI for command search and debugging.</p><a href="https://www.warp.dev/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Blackbox AI</h3><p>AI code generation, code chat, and search that helps you build software faster.</p><a href="https://www.blackbox.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Devin AI</h3><p>The first autonomous AI software engineer, capable of handling entire dev projects.</p><a href="https://www.cognition-labs.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Sweep AI</h3><p>AI junior developer that turns bug reports and feature requests into code changes.</p><a href="https://sweep.dev/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Mintlify</h3><p>AI-powered writer and toolkit for creating beautiful, effective documentation.</p><a href="https://mintlify.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pieces for Developers</h3><p>AI-powered snippet manager and workflow copilot that works across your tools.</p<a href="https://pieces.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Sentry</h3><p>Error tracking and performance monitoring with AI to help you debug faster.</p><a href="https://sentry.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Adrenaline</h3><p>AI debugging assistant that helps you find and fix bugs in your codebase.</p><a href="https://useadrenaline.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>MutableAI</h3><p>AI-accelerated software development for rapid prototyping and production code.</p><a href="https://mutable.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>WhatTheDiff</h3><p>An AI-powered code review assistant that summarizes pull requests in plain English.</p><a href="https://whatthediff.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Bugasura</h3><p>AI-powered bug tracker designed for modern, agile development teams.</p><a href="https://bugasura.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>JetBrains AI Assistant</h3><p>AI features deeply integrated into JetBrains IDEs like IntelliJ IDEA and PyCharm.</p><a href="https://www.jetbrains.com/ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Safurai</h3><p>AI code assistant to help developers with code optimization, review, and security.</p><a href="https://safurai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Code Llama</h3><p>A large language model from Meta specialized for code generation and understanding.</p><a href="https://ai.meta.com/blog/code-llama-large-language-model-coding/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+            
+             <!-- Audio & Music -->
+            <div id="cat-audio" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Audio & Music</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Suno AI</h3><p>Create incredible, original songs, complete with lyrics and vocals, from a text prompt.</p><a href="https://www.suno.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Udio</h3><p>An extraordinary AI music generation tool for creating full tracks in various genres.</p><a href="https://www.udio.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>ElevenLabs</h3><p>Industry-leading AI for realistic text-to-speech, voice cloning, and sound effects.</p><a href="https://elevenlabs.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Descript</h3><p>All-in-one audio and video editor with powerful AI features like overdub and studio sound.</p><a href="https://www.descript.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Adobe Podcast</h3><p>Web-based AI audio tools for enhancing speech, removing noise, and checking mics.</p><a href="https://podcast.adobe.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>LALAL.AI</h3><p>High-quality stem splitter to extract vocals, drums, and instruments from any audio.</p><a href="https://www.lalal.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Murf.ai</h3><p>Versatile AI voice generator with a library of studio-quality voices for any project.</p><a href="https://murf.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Moises.ai</h3><p>AI-powered app for musicians to separate tracks, practice, and remix songs.</p><a href="https://moises.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Mubert</h3><p>AI music generation platform for creating royalty-free soundtracks for content.</p><a href="https://mubert.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Play.ht</h3><p>AI-powered text-to-voice generator with ultra-realistic voices and voice cloning.</p><a href="https://play.ht/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>AIVA</h3><p>AI music composer for creating original, emotional soundtracks and themes for creators.</p><a href="https://www.aiva.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Podcastle</h3><p>All-in-one platform for audio and video creation with AI recording and editing tools.</p><a href="https://podcastle.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Boomy</h3><p>Generate original songs with AI in seconds and release them to major streaming platforms.</p><a href="https://boomy.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Soundraw</h3><p>AI music generator for creators that allows you to customize length, mood, and genre.</p><a href="https://soundraw.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Lovo.ai</h3><p>Highly realistic AI voice generator and text-to-speech platform with 500+ voices.</p><a href="https://lovo.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Auphonic</h3><p>Automatic audio post-production web service for podcasts, screencasts, and radio.</p><a href="https://auphonic.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>VocalRemover.org</h3><p>Free online tool to separate voice from music using powerful AI algorithms.</p><a href="https://vocalremover.org/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Resemble.ai</h3><p>Complete generative voice AI toolkit for cloning, creating, and editing voices in real-time.</p><a href="https://www.resemble.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Soundful</h3><p>AI-powered music creation platform to generate unique, royalty-free tracks.</p<a href="https://soundful.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Krisp</h3><p>AI-powered noise cancellation app that mutes background noise in any communication app.</p><a href="https://krisp.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>LANDR</h3><p>AI-powered music mastering, distribution, and sample platform for producers.</p><a href="https://www.landr.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Speechify</h3><p>Text-to-speech reader that turns any text into high-quality audio with AI voices.</p><a href="https://speechify.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Splash</h3><p>AI-powered music and singing game that makes it easy for anyone to create original music.</p><a href="https://www.splashmusic.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>WellSaid Labs</h3><p>Enterprise-grade AI text-to-speech for creating high-quality voiceovers from text.</p><a href="https://www.wellsaidlabs.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Beatoven.ai</h3><p>Create custom, royalty-free background music that is mood-based and genre-specific.</p><a href="https://www.beatoven.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+            </div>
+            
+            <!-- Productivity -->
+            <div id="cat-productivity" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Productivity</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Notion AI</h3><p>AI assistant integrated into the Notion workspace for summarizing, writing, and brainstorming.</p><a href="https://www.notion.so/product/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Fireflies.ai</h3><p>AI assistant that records, transcribes, summarizes, and analyzes your meetings.</p><a href="https://fireflies.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Otter.ai</h3><p>AI meeting assistant that generates real-time notes, summaries, and action items.</p><a href="https://otter.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Motion</h3><p>AI-powered calendar and project manager that intelligently optimizes your schedule.</p><a href="https://www.usemotion.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Reclaim.ai</h3><p>AI calendar assistant that automatically finds the best time for your tasks and habits.</p><a href="https://reclaim.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Gamma</h3><p>An AI-powered medium for presenting ideas. Creates beautiful, interactive decks.</p><a href="https://gamma.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Tome</h3><p>AI-powered storytelling format for creating dynamic presentations and narratives.</p><a href="https://tome.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>ClickUp AI</h3><p>AI assistant within the ClickUp productivity platform to accelerate any task.</p><a href="https://clickup.com/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Taskade</h3><p>AI-powered productivity platform for team collaboration, mind mapping, and organization.</p><a href="https://www.taskade.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Mem</h3><p>A self-organizing workspace powered by AI to capture and connect your notes.</p><a href="https://mem.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Zapier</h3><p>Automate your workflows between apps with AI-powered triggers and actions.</p><a href="https://zapier.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>SaneBox</h3><p>AI for cleaning up your inbox by filtering important emails and removing distractions.</p><a href="https://www.sanebox.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Miro AI</h3><p>AI assistant within the Miro whiteboard to generate ideas, diagrams, and code blocks.</p><a href="https://miro.com/ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>tl;dv</h3><p>AI meeting recorder that transcribes and summarizes your calls on Zoom and Google Meet.</p><a href="https://tldv.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Beautiful.ai</h3><p>An AI presentation maker that designs professional, beautiful slides for you automatically.</p><a href="https://www.beautiful.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Superhuman</h3><p>The fastest email experience ever, with AI features to summarize and draft replies.</p><a href="https://superhuman.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Coda AI</h3><p>AI assistant that works across your Coda docs to manage knowledge and automate work.</p><a href="https://coda.io/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Krisp</h3><p>AI-powered noise cancellation app that mutes background noise during calls.</p><a href="https://krisp.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>SlidesAI.io</h3><p>AI tool that creates presentation slides from your text in Google Slides instantly.</p><a href="https://www.slidesai.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Magical</h3><p>AI-powered text expander and automation tool to speed up repetitive tasks anywhere.</p><a href="https://www.getmagical.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Asana Intelligence</h3><p>AI features within Asana to help manage projects, set goals, and improve workflows.</p><a href="https://asana.com/product/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Whimsical</h3><p>Visual workspace with AI for generating mind maps, flowcharts, and diagrams.</p><a href="https://whimsical.com/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Fathom</h3><p>Free AI meeting assistant that records, transcribes, and summarizes your video calls.</p><a href="https://fathom.video/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Reflect</h3><p>A networked note-taking tool with integrated AI for thinking and organization.</p><a href="https://reflect.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Text Blaze</h3><p>Text expander and snippet manager with AI to automate typing and write emails faster.</p><a href="https://blaze.today/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Clockwise</h3><p>AI calendar tool that optimizes your team's schedule to create more focus time.</p><a href="https://www.getclockwise.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Slack AI</h3><p>Catch up on channels, get conversation summaries, and find answers within Slack.</p><a href="https://slack.com/features/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>monday.com AI</h3><p>AI assistant within monday.com to automate tasks, generate content, and summarize work.</p><a href="https://monday.com/ai-assistant" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+            
+            <!-- Marketing & SEO -->
+            <div id="cat-marketing" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Marketing & SEO</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Surfer SEO</h3><p>AI-driven content intelligence tool for writing and optimizing articles for search engines.</p><a href="https://surferseo.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Jasper</h3><p>The leading AI copywriter and content platform for enterprise marketing teams.</p><a href="https://www.jasper.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Semrush</h3><p>Offers a suite of AI tools for SEO, content marketing, and competitive research.</p><a href="https://www.semrush.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>AdCreative.ai</h3><p>Generate conversion-focused ad creatives and social media posts in seconds.</p><a href="https://www.adcreative.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Copy.ai</h3><p>AI-powered copywriter that generates high-quality marketing copy and content.</p><a href="https://www.copy.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Anyword</h3><p>AI copywriting platform that predicts performance and optimizes copy for conversions.</p><a href="https://anyword.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Frase.io</h3><p>AI tool for content research, brief creation, writing, and optimization.</p><a href="https://www.frase.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>HubSpot AI</h3><p>Suite of AI tools for marketing, sales, and service within the HubSpot platform.</p><a href="https://www.hubspot.com/artificial-intelligence" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Flick</h3><p>AI social media assistant for brainstorming content ideas, writing captions, and scheduling.</p><a href="https://www.flick.tech/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>MarketMuse</h3><p>AI content planning and optimization software for building topical authority.</p><a href="https://www.marketmuse.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Clearscope</h3><p>High-end content optimization tool that helps you create content that ranks.</p><a href="https://www.clearscope.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Looka</h3><p>Design a logo and build a complete brand identity you love with the power of AI.</p><a href="https://looka.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Zapier</h3><p>Automate workflows between your apps with AI-powered suggestions and logic.</p><a href="https://zapier.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Gong</h3><p>Revenue intelligence platform that uses AI to analyze customer-facing conversations.</p><a href="https://www.gong.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Mailchimp</h3><p>Email marketing platform with AI tools for subject lines and content optimization.</p><a href="https://mailchimp.com/features/ai-tools/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Drift</h3><p>AI-powered conversational marketing and sales platform with intelligent chatbots.</p><a href="https://www.drift.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Regie.ai</h3><p>AI platform for sales teams to create, test, and analyze personalized outreach campaigns.</p><a href="https://www.regie.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Predis.ai</h3><p>AI social media marketing tool to create video posts, captions, and hashtags.</p><a href="https://predis.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Pencil</h3><p>Creative AI platform that generates new ad variations from your existing assets.</p><a href="https://www.trypencil.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Brandmark.io</h3><p>AI-powered logo design tool for creating unique, professional logos and branding.</p><a href="https://brandmark.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>10Web</h3><p>AI-powered WordPress platform for building and managing websites with automation.</p><a href="https://10web.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Buffer</h3><p>Social media toolkit with an AI assistant for brainstorming and rewriting posts.</p><a href="https://buffer.com/ai-assistant" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Lately</h3><p>AI content marketing tool that repurposes long-form content into social media posts.</p><a href="https://www.lately.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>NeuronWriter</h3><p>Content optimization tool with AI writing for creating articles based on SERP analysis.</p><a href="https://neuronwriter.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Outreach.io</h3><p>Sales execution platform with AI-driven insights to help close more deals.</p><a href="https://www.outreach.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+            
+            <!-- 3D & Design -->
+            <div id="cat-design" class="category-block">
+                <h3 class="category-subtitle scroll-animate">3D & Design</h3>
+                <div class="tools-grid">
+                   <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Canva Magic Studio</h3><p>All-in-one design suite with AI tools for creating images, text, and presentations.</p><a href="https://www.canva.com/magic-studio/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Framer AI</h3><p>AI website builder that turns text prompts into complete, publishable websites.</p><a href="https://www.framer.com/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Uizard</h3><p>AI-powered design tool for creating wireframes, mockups, and prototypes from text.</p><a href="https://uizard.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Luma AI</h3><p>Create incredible, lifelike 3D models and scenes from video using your phone.</p><a href="https://lumalabs.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Spline</h3><p>A collaborative 3D design tool for the web with built-in AI generation features.</p><a href="https://spline.design/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Meshy</h3><p>AI 3D generator that creates textures and models from text and 2D images.</p><a href="https://www.meshy.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Galileo AI</h3><p>AI copilot for interface design, turning text prompts into editable Figma designs.</p><a href="https://www.usegalileo.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Diagram</h3><p>A collection of AI design tools, including Magician for Figma, for UI/UX tasks.</p><a href="https://diagram.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Looka</h3><p>Design a professional logo and build a complete brand identity with the power of AI.</p><a href="https://looka.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Microsoft Designer</h3><p>AI-powered graphic design app to quickly create social posts, invitations, and more.</p><a href="https://designer.microsoft.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Recraft AI</h3><p>Generate consistent style vector art, icons, 3D images, and illustrations.</p><a href="https://www.recraft.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Krea AI</h3><p>Real-time AI image generator and upscaler for creating stunning visuals and patterns.</p><a href="https://www.krea.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Khroma</h3><p>AI color tool for designers to discover and generate infinite color palettes.</p><a href="http://khroma.co/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Masterpiece Studio</h3><p>A complete suite of tools for creating and editing 3D content with generative AI.</p><a href="https://www.masterpiecestudio.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Wix ADI</h3><p>AI-powered website builder that creates custom websites in minutes.</p><a href="https://www.wix.com/adi-website-builder" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Durable</h3><p>AI website builder that generates an entire website with images and copy in seconds.</p><a href="https://durable.co/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Vizcom</h3><p>AI design tool that renders your drawings and sketches into realistic product concepts.</p><a href="https://www.vizcom.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pebblely</h3><p>AI product photography tool that creates beautiful lifestyle images for any product.</p><a href="https://pebblely.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Relume</h3><p>AI site builder that generates sitemaps and wireframes for Figma and Webflow.</p><a href="https://www.relume.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>NVIDIA Canvas</h3><p>Turn simple brushstrokes into realistic landscape images with AI.</p><a href="https://www.nvidia.com/en-us/studio/canvas/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Kaedim</h3><p>Generate production-ready 3D models from 2D images or text prompts in minutes.</p><a href="https://www.kaedim3d.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Autodraw</h3><p>Google's drawing tool that pairs machine learning with artist drawings to help you create.</p><a href="https://www.autodraw.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Visily</h3><p>AI-powered wireframing and collaboration tool for non-designer teams.</p><a href="https://www.visily.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Let's Enhance</h3><p>AI image upscaler and enhancer for improving photo quality and resolution.</p><a href="https://letsenhance.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Remove.bg</h3><p>Automatically remove the background from any image with a single click using AI.</p><a href="https://www.remove.bg/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Colormind</h3><p>AI-powered color scheme generator that can learn color styles from images and art.</p><a href="http://colormind.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Brandmark.io</h3><p>Advanced AI logo maker for creating unique, professional logos and branding assets.</p><a href="https://brandmark.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Interior AI</h3><p>AI interior design tool for generating new styles and virtual stagings for your space.</p><a href="https://interiorai.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Fontjoy</h3><p>AI tool that helps designers choose the best font pairings using deep learning.</p><a href="https://fontjoy.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Fronty</h3><p>AI-powered tool that converts images to clean HTML and CSS code for websites.</p><a href="https://fronty.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+            
+            <!-- Research & Data -->
+            <div id="cat-research" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Research & Data</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Perplexity AI</h3><p>Conversational search engine that gives direct answers with cited sources.</p><a href="https://www.perplexity.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Consensus</h3><p>AI search engine for research that extracts findings from scientific papers.</p><a href="https://consensus.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Elicit</h3><p>AI research assistant to automate literature reviews and find relevant papers.</p><a href="https://elicit.org/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>ChatPDF</h3><p>Chat with any PDF document to quickly extract information and get summaries.</p><a href="https://www.chatpdf.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Julius AI</h3><p>AI data analyst to analyze spreadsheets, create charts, and answer data questions.</p><a href="https://julius.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Explainpaper</h3><p>A better way to read academic papers by explaining confusing text and concepts.</p><a href="https://www.explainpaper.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Scite</h3><p>See how research papers have been cited and if they were supported or contradicted.</p><a href="https://scite.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Numerous.ai</h3><p>The AI assistant for your spreadsheets that automates tedious tasks in Sheets & Excel.</p><a href="https://numerous.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>WolframAlpha</h3><p>A computational knowledge engine for expert-level answers in math and science.</p><a href="https://www.wolframalpha.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Humata AI</h3><p>AI-powered tool to chat with your files, summarize documents, and find answers.</p><a href="https://www.humata.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Notion AI</h3><p>AI assistant integrated within Notion to summarize, write, and brainstorm.</p><a href="https://www.notion.so/product/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>ResearchRabbit</h3><p>Explore and visualize research papers and authors in a connected graph.</p><a href="https://www.researchrabbit.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>SciSpace</h3><p>AI copilot for understanding research papers with summaries and explanations.</p><a href="https://typeset.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>You.com</h3><p>AI chat and search engine with different modes for search, creation, and coding.</p><a href="https://you.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Phind</h3><p>An AI search engine and pair programmer for developers to solve coding problems.</p><a href="https://www.phind.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Coda AI</h3><p>AI assistant within Coda docs to help manage knowledge and automate work.</p><a href="https://coda.io/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Otter.ai</h3><p>AI meeting assistant that records audio, writes notes, and generates summaries.</p><a href="https://otter.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Fireflies.ai</h3><p>Automated meeting notes and conversation intelligence platform for teams.</p><a href="https://fireflies.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Gamma</h3><p>An AI-powered alternative to slides for creating engaging presentations and docs.</p><a href="https://gamma.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Tome</h3><p>Generative storytelling format for creating presentations and narratives with AI.</p><a href="https://tome.app/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>AskYourPDF</h3><p>Another popular AI chat system for interacting with and understanding PDF files.</p><a href="https://askyourpdf.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Connected Papers</h3><p>A visual tool to help researchers find and explore academic papers.</p><a href="https://www.connectedpapers.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Wordtune Read</h3><p>AI reader that summarizes long documents, articles, and PDFs instantly.</p><a href="https://www.wordtune.com/read" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Genei</h3><p>AI-powered research tool for summarizing articles and producing notes faster.</p><a href="https://www.genei.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Taskade</h3><p>AI-powered productivity app for outlining notes, automating tasks, and mind mapping.</p><a href="https://www.taskade.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Miro AI</h3><p>AI assistant within the Miro whiteboard to generate ideas, diagrams, and summaries.</p><a href="https://miro.com/ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Mem</h3><p>A self-organizing workspace with AI features to connect and find your notes.</p><a href="https://mem.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Saga AI</h3><p>AI assistant to help write, edit, and brainstorm ideas directly in your documents.</p><a href="https://saga.so/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Ajelix</h3><p>AI tools for Excel and Google Sheets to write formulas, translate, and explain code.</p><a href="https://ajelix.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Arc Search</h3><p>Mobile AI browser that browses for you and creates a custom webpage with answers.</p><a href="https://apps.apple.com/us/app/arc-search/id6472013062" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Whimsical</h3><p>Visual workspace with AI for generating mind maps and diagrams from text prompts.</p><a href="https://whimsical.com/ai" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>PopAi</h3><p>AI-powered reading and writing assistant for documents, slides, and academic work.</p><a href="https://www.popai.pro/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Akkio</h3><p>No-code AI platform for building and deploying predictive models from your data.</p><a href="https://www.akkio.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Formula Bot</h3><p>AI formula generator and data analysis tool for Excel and Google Sheets.</p><a href="https://formulabot.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Gigasheet</h3><p>AI spreadsheet for analyzing massive datasets without code or complex setup.</p><a href="https://www.gigasheet.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Slidebean</h3><p>AI-powered presentation software that designs professional slides for you.</p><a href="https://slidebean.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-free">Free</span><h3>Semantic Scholar</h3><p>An AI-backed search engine for scientific literature from the Allen Institute for AI.</p><a href="https://www.semanticscholar.org/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Rose AI</h3><p>AI data platform that helps you find, visualize, and share data insights.</p><a href="https://rose.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Power BI</h3><p>Microsoft's business analytics tool with integrated AI for data visualization.</p><a href="https://powerbi.microsoft.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+<div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Tableau</h3><p>Leading data visualization platform with AI-driven analytics and business intelligence.</p><a href="https://www.tableau.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                </div>
+            </div>
+
+            <!-- Voice & Avatar -->
+            <div id="cat-voice" class="category-block">
+                <h3 class="category-subtitle scroll-animate">Voice & Avatar</h3>
+                <div class="tools-grid">
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>ElevenLabs</h3><p>High-quality voice synthesis and voice cloning platform using generative AI.</p><a href="https://www.elevenlabs.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Murf.ai</h3><p>Text-to-speech voice generator with realistic AI voices for content creators.</p><a href="https://murf.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Descript</h3><p>All-in-one video and audio editing tool with AI voice and overdub features.</p><a href="https://www.descript.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Synthesia</h3><p>Leading AI video generation platform to create videos with AI avatars and voices.</p><a href="https://www.synthesia.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>HeyGen</h3><p>AI video tool to create talking presenters and custom avatars from text or scripts.</p><a href="https://www.heygen.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Play.ht</h3><p>AI-powered text-to-voice generator with ultra-realistic voices and voice cloning.</p><a href="https://play.ht/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Lovo.ai</h3><p>AI voice generator and text-to-speech platform with 500+ voices in 100+ languages.</p><a href="https://lovo.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>D-ID</h3><p>Create videos from still images, text, or audio with AI-powered digital people.</p><a href="https://www.d-id.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Clipchamp</h3><p>AI-powered video editor by Microsoft with built-in voiceover and text-to-speech tools.</p><a href="https://www.clipchamp.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Fliki</h3><p>Turn text into videos with AI voices, stock media library, and branded subtitles.</p><a href="https://fliki.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Veed.io</h3><p>Online video suite with AI tools for editing, subtitles, transcription, and avatars.</p><a href="https://www.veed.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Resemble.ai</h3><p>Complete generative voice AI toolkit for cloning, creating, and editing voices.</p><a href="https://www.resemble.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pictory</h3><p>AI video generator that automatically creates short, shareable videos from long content.</p><a href="https://pictory.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Hour One</h3><p>AI video creation platform using digital avatars and synthetic voices for business.</p><a href="https://www.hourone.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Animaker</h3><p>AI video creation tool with voiceovers, custom avatars, and live-action animation.</p><a href="https://www.animaker.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Speechelo</h3><p>Text-to-speech software with over 30 human-sounding voice styles.</p><a href="https://speechelo.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Natural Readers</h3><p>Online text-to-speech tool with multiple voices, reading modes, and a Chrome extension.</p><a href="https://www.naturalreaders.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>CapCut</h3><p>Popular mobile and desktop video editor with extensive AI features and effects.</p><a href="https://www.capcut.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>RunwayML</h3><p>Advanced AI magic tools for video, including text-to-video, inpainting, and motion tracking.</p><a href="https://runwayml.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>InVideo</h3><p>Online video creator that turns your text, articles, or scripts into engaging videos.</p><a href="https://invideo.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Colossyan</h3><p>AI video generator for workplace learning and communication with realistic avatars.</p><a href="https://www.colossyan.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Deepbrain AI</h3><p>Create realistic AI avatar videos quickly by simply typing a script.</p><a href="https://www.deepbrain.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Pika</h3><p>Idea-to-video platform that brings your creativity to motion with powerful AI.</p><a href="https://pika.art/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>WellSaid Labs</h3><p>Enterprise-grade AI text-to-speech for creating voiceovers from text in real time.</p><a href="https://www.wellsaidlabs.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Synthesys</h3><p>AI content suite for generating voiceovers, videos, and images from text.</p><a href="https://synthesys.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-paid">Paid</span><h3>Vidnoz</h3><p>Free AI video generator with 300+ avatars, 470+ realistic voices, and templates.</p><a href="https://www.vidnoz.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>FlexClip</h3><p>Easy-to-use online video maker with rich templates and AI-powered tools.</p><a href="https://www.flexclip.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Yepic AI</h3><p>AI video platform for creating and translating talking head videos at scale.</p><a href="https://www.yepic.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Kajabi</h3><p>All-in-one platform with AI creator tools for courses, including video script generation.</p><a href="https://kajabi.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Elai.io</h3><p>Generate AI videos with custom avatars from just text for training and marketing.</p><a href="https://elai.io/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Steve.AI</h3><p>AI tool that turns scripts into animated or live-action videos for social media.</p><a href="https://www.steve.ai/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                    <div class="tool-card scroll-animate"><span class="tool-label label-freemium">Freemium</span><h3>Speechify</h3><p>Text-to-speech reader that turns any text into high-quality audio with AI voices.</p><a href="https://speechify.com/" class="btn" target="_blank" rel="noopener noreferrer">Visit Site</a></div>
+                                    </div>
+            </div>
+            
+        </section>
+
+        <!-- ======== 7. CALL TO ACTION (CTA) SECTION ======== -->
+        <section id="cta" class="parallax-section bg-1">
+    <div class="hero-content scroll-animate">
+        <h2 class="section-title" style="font-size: 3rem;">subscribe to our channel</h2>
+        <p class="subtitle" style="margin-bottom: 30px;">Get the latest information about my creations.</p>
+        
+        <!-- The link has been corrected below -->
+        <a href="https://www.youtube.com/@i4inform" class="btn" target="_blank" rel="noopener noreferrer" style="padding: 15px 40px; font-size: 1.2rem;">Subscribe Now</a>
+    </div>
+</section>
+    </main>
+    
+    <!-- ======== 8. FOOTER ======== -->
+    <footer class="footer">
+        <p>&copy; 2024 AI Xplorer. All Rights Reserved. Exploring the digital cosmos.</p>
+    </footer>
+
+    <script>
+        // JavaScript - All interactivity is in this block
+
+        // --- PRELOADER LOGIC ---
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('loaded');
+        });
+
+        // --- SCROLL ANIMATION LOGIC (using Intersection Observer) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            animatedElements.forEach(el => {
+                observer.observe(el);
+            });
+            
+            // --- NEW: TRIANGLE CANVAS ANIMATION ---
+            // Initialize the animation for the single, persistent background canvas
+            initTriangleCanvas('background-canvas');
+        });
+
+        // --- NEW: TRIANGLE CANVAS SETUP AND ANIMATION FUNCTION ---
+        function initTriangleCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return; // Exit if canvas doesn't exist
+            
+            const ctx = canvas.getContext('2d');
+            let triangles = [];
+            const triangleColors = ['#00ff7f', '#39ff14']; // Green accent colors
+
+            let mouse = {
+                x: undefined,
+                y: undefined,
+                radius: 150 // Area of effect for mouse interaction
+            };
+
+            // MODIFIED: Use document instead of window for mouse move to track across the whole page
+            document.addEventListener('mousemove', (event) => {
+                mouse.x = event.clientX;
+                mouse.y = event.clientY;
+            });
+            
+            window.addEventListener('mouseout', () => {
+                mouse.x = undefined;
+                mouse.y = undefined;
+            });
+
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                initTriangles();
+            }
+
+            class Triangle {
+                constructor(x, y, directionX, directionY, size, color, isOutline) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
+                    this.isOutline = isOutline;
+                    this.baseX = this.x; // For returning to original path
+                    this.baseY = this.y;
+                    this.density = (Math.random() * 20) + 10; // How much mouse affects it
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    const angle = Math.PI * 2 / 3;
+                    for (let i = 0; i < 3; i++) {
+                        const pointX = this.x + this.size * Math.cos(angle * i);
+                        const pointY = this.y + this.size * Math.sin(angle * i);
+                        if (i === 0) {
+                            ctx.moveTo(pointX, pointY);
+                        } else {
+                            ctx.lineTo(pointX, pointY);
+                        }
+                    }
+                    ctx.closePath();
+
+                    if (this.isOutline) {
+                        ctx.strokeStyle = this.color;
+                        ctx.lineWidth = 1;
+                        ctx.globalAlpha = 0.6;
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = this.color;
+                        ctx.globalAlpha = 0.3;
+                        ctx.fill();
+                    }
+                     ctx.globalAlpha = 1; // Reset alpha
+                }
+
+                update() {
+                    // Mouse interaction
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    let forceDirectionX = dx / distance;
+                    let forceDirectionY = dy / distance;
+                    let maxDistance = mouse.radius;
+                    // Invert the force as it gets closer
+                    let force = (maxDistance - distance) / maxDistance;
+                    let directionX = forceDirectionX * force * this.density;
+                    let directionY = forceDirectionY * force * this.density;
+                    
+                    if (distance < mouse.radius) {
+                        this.x -= directionX;
+                        this.y -= directionY;
+                    } else {
+                        // Return to base position if mouse is away
+                        if (this.x !== this.baseX) {
+                            let dx = this.x - this.baseX;
+                            this.x -= dx/10;
+                        }
+                         if (this.y !== this.baseY) {
+                            let dy = this.y - this.baseY;
+                            this.y -= dy/10;
+                        }
+                    }
+                    
+                    // Ambient movement (original logic - simplified)
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    
+                    this.baseX += this.directionX;
+                    this.baseY += this.directionY;
+
+
+                    // Wall collision / wrap around
+                    if (this.x + this.size < 0) { this.x = canvas.width + this.size; this.baseX = this.x; }
+                    if (this.x - this.size > canvas.width) { this.x = -this.size; this.baseX = this.x; }
+                    if (this.y + this.size < 0) { this.y = canvas.height + this.size; this.baseY = this.y; }
+                    if (this.y - this.size > canvas.height) { this.y = -this.size; this.baseY = this.y; }
+
+                    this.draw();
+                }
+            }
+
+            function initTriangles() {
+                triangles = [];
+                let numberOfTriangles = (canvas.width * canvas.height) / 9000;
+                for (let i = 0; i < numberOfTriangles; i++) {
+                    let size = Math.random() * 5 + 5;
+                    let x = Math.random() * canvas.width;
+                    let y = Math.random() * canvas.height;
+                    let directionX = (Math.random() * 0.4) - 0.2;
+                    let directionY = (Math.random() * 0.4) - 0.2;
+                    let color = triangleColors[Math.floor(Math.random() * triangleColors.length)];
+                    let isOutline = Math.random() > 0.5;
+                    triangles.push(new Triangle(x, y, directionX, directionY, size, color, isOutline));
+                }
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < triangles.length; i++) {
+                    triangles[i].update();
+                }
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas(); // Initial call
+            animate();
+        }
+    </script>
+</body>
+</html>
